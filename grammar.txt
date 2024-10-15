@@ -1,0 +1,86 @@
+grammar CCompiler;
+
+// Definição de tokens (com descrições RegEx)
+
+// Tipos primitivos
+INT     : 'int';                      // Palavra-chave para tipo inteiro
+FLOAT   : 'float';                    // Palavra-chave para tipo float
+VOID    : 'void';                     // Palavra-chave para tipo void
+
+// Estruturas de controle
+IF      : 'if';                       // Palavra-chave para declaração if
+ELSE    : 'else';                     // Palavra-chave para declaração else
+WHILE   : 'while';                    // Palavra-chave para loop while
+RETURN  : 'return';                   // Palavra-chave para declaração return
+
+// Identificadores
+ID      : [a-zA-Z_][a-zA-Z0-9_]*;     // Identificadores: começam com letra ou sublinhado, seguidos de letras, dígitos ou sublinhados
+
+// Números
+NUMBER  : [0-9]+;                     // Números inteiros: sequência de dígitos
+FLOATNUMBER : [0-9]+'.'[0-9]*;        // Números de ponto flutuante: sequência de dígitos com ponto decimal
+
+// Operadores
+PLUS    : '+';                        // Operador de adição
+MINUS   : '-';                        // Operador de subtração
+MULT    : '*';                        // Operador de multiplicação
+DIV     : '/';                        // Operador de divisão
+ASSIGN  : '=';                        // Operador de atribuição
+
+// Delimitadores
+SEMI    : ';';                        // Ponto e vírgula ';'
+COMMA   : ',';                        // Vírgula ','
+LPAREN  : '(';                        // Parêntese esquerdo '('
+RPAREN  : ')';                        // Parêntese direito ')'
+LBRACE  : '{';                        // Chave esquerda '{'
+RBRACE  : '}';                        // Chave direita '}'
+
+// Espaços em branco
+WS      : [ \t\n\r]+ -> skip;         // Ignorando espaços em branco: espaço, tabulação, nova linha
+
+// Regras de parser (gramática)
+
+prog:   (decl)* ;                      // Programa consiste de declarações
+
+decl:   varDecl                        // Declaração de variável
+    |   funcDecl                       // Declaração de função
+    ;
+
+varDecl: type ID (ASSIGN expr)? SEMI ;  // Declaração de variável (com atribuição opcional)
+
+funcDecl: type ID LPAREN params? RPAREN block ; // Declaração de função
+
+params: param (COMMA param)* ;          // Parâmetros de função
+
+param: type ID ;                        // Parâmetro: tipo e identificador
+
+type:   INT                             // Tipo 'int'
+    |   FLOAT                           // Tipo 'float'
+    |   VOID                            // Tipo 'void'
+    ;
+
+block:  LBRACE (varDecl | stmt)* RBRACE ; // Bloco de código
+
+stmt:   exprStmt                        // Expressão
+    |   ifStmt                          // Declaração if-else
+    |   whileStmt                       // Declaração while
+    |   returnStmt                      // Declaração return
+    |   block                           // Bloco de código
+    ;
+
+exprStmt: expr? SEMI ;                  // Declaração de expressão
+
+ifStmt: IF LPAREN expr RPAREN stmt (ELSE stmt)? ; // Declaração if-else
+
+whileStmt: WHILE LPAREN expr RPAREN stmt ; // Declaração while
+
+returnStmt: RETURN expr? SEMI ;         // Declaração return
+
+expr:   expr (PLUS | MINUS) expr        // Operações aritméticas
+    |   expr (MULT | DIV) expr
+    |   ID ASSIGN expr                  // Atribuição
+    |   ID                              // Identificador
+    |   NUMBER                          // Número inteiro
+    |   FLOATNUMBER                     // Número de ponto flutuante
+    |   LPAREN expr RPAREN              // Expressão entre parênteses
+    ;
